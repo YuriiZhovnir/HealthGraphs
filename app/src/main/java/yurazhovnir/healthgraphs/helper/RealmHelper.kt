@@ -7,15 +7,17 @@ import io.realm.kotlin.notifications.ResultsChange
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.flow.Flow
 import yurazhovnir.healthgraphs.model.HealthRecord
+import yurazhovnir.healthgraphs.model.LastTimeAdd
 
 object RealmHelper {
     private val config =
         RealmConfiguration.Builder(
             schema = setOf(
                 HealthRecord::class,
+                LastTimeAdd::class,
             )
         )
-            .schemaVersion(1)
+            .schemaVersion(3)
             .build()
 
     var realm: Realm? = Realm.open(config)

@@ -42,7 +42,6 @@ class RoundedBarChartTime @JvmOverloads constructor(
                 style = Paint.Style.STROKE
             }
             mBarValuePaint.apply {
-//                color = dataSet.valueTextColor // Needs to be set correctly based on data
                 textSize = Utils.convertDpToPixel(20f)
                 textAlign = Paint.Align.CENTER
 

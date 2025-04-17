@@ -45,10 +45,10 @@ android {
         }
 
         create("dev") {
-            applicationId = "com.yurazhovnir.myfeeling"
+            applicationId = "yurazhovnir.healthgraphs"
             versionCode = 1
             versionName = "1.0.0"
-            resValue("string", "app_name", "DEV yurazhovnir")
+            resValue("string", "app_name", "Health Graphs")
             buildConfigField(
                 "String",
                 "SERVER_URL",

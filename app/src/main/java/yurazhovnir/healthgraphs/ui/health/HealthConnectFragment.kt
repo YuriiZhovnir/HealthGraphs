@@ -28,7 +28,7 @@ class HealthConnectFragment : BaseBindingFragment<FragmentHealthConnectBinding>(
             addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Day))
             addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Week))
             addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Month))
-            addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Year))
+//            addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Year))
 
         }
         binding.viewPager.apply {

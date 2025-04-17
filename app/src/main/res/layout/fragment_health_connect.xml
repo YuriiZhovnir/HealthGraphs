@@ -57,7 +57,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/dayView"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="40dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:onClick="@{()-> connectFragment.onDayClick()}"
@@ -66,7 +66,7 @@
                 app:cardElevation="0dp">
 
                 <TextView
-                    style="@style/Text.Bold.21sp"
+                    style="@style/Text.Bold.17sp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
@@ -78,7 +78,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/weekView"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="40dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:onClick="@{()-> connectFragment.onWeekClick()}"
@@ -87,7 +87,7 @@
                 app:cardElevation="0dp">
 
                 <TextView
-                    style="@style/Text.Bold.21sp"
+                    style="@style/Text.Bold.17sp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
@@ -99,7 +99,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/monthView"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="40dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:onClick="@{()-> connectFragment.onMonthClick()}"
@@ -108,7 +108,7 @@
                 app:cardElevation="0dp">
 
                 <TextView
-                    style="@style/Text.Bold.21sp"
+                    style="@style/Text.Bold.17sp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
@@ -120,16 +120,17 @@
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/yearView"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="40dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
+                android:visibility="gone"
                 android:onClick="@{()-> connectFragment.onYearClick()}"
                 app:cardBackgroundColor='@{positionSelected == 3 ? @color/color_selected : @color/transparent}'
                 app:cardCornerRadius="26dp"
                 app:cardElevation="0dp">
 
                 <TextView
-                    style="@style/Text.Bold.21sp"
+                    style="@style/Text.Bold.17sp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
@@ -140,6 +141,7 @@
         </LinearLayout>
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/viewPager"
+            android:layout_marginTop="24dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </LinearLayout>

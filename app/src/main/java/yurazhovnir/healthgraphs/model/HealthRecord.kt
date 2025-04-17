@@ -6,7 +6,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 open class HealthRecord : RealmObject {
     @PrimaryKey
     var id: Int = 0
-
+    var type: String= ""
     var doneAt: String? = ""
     var startsAt: String? = ""
 
@@ -25,3 +25,9 @@ open class HealthRecord : RealmObject {
     var source: String? = null
     var synced: Boolean = false
 }
+open class LastTimeAdd : RealmObject {
+    @PrimaryKey
+    var id: Int = 1
+    var lastAt: String? = ""
+}
+
