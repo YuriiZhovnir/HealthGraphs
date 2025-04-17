@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RoundedBarChart">
+        <attr name="radius" format="dimension" />
+        <attr name="barBorderColor" format="color" />
+        <attr name="barBorderWidth" format="dimension" />
+    </declare-styleable>
+</resources>

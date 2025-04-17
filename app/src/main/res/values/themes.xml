@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.HealthGraphs" parent="Theme.MaterialComponents.Light.NoActionBar">
+    </style>
+
+    <!-- Light styles -->
+    <style name="Text">
+    </style>
+
+    <style name="Text.Light">
+        <item name="android:fontFamily">@font/open_sans_light</item>
+    </style>
+
+    <style name="Text.Medium">
+        <item name="android:fontFamily">@font/open_sans_medium</item>
+    </style>
+
+    <style name="Text.Bold">
+        <item name="android:fontFamily">@font/open_sans_bold</item>
+    </style>
+
+    <style name="Text.SemiBold">
+        <item name="android:fontFamily">@font/open_sans_semi_bold</item>
+    </style>
+
+    <!-- Medium styles -->
+    <style name="Text.Medium.11sp">
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="Text.Medium.13sp">
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="Text.Medium.15sp">
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="Text.Medium.17sp">
+        <item name="android:textSize">17sp</item>
+    </style>
+
+    <style name="Text.Medium.25sp">
+        <item name="android:textSize">25sp</item>
+    </style>
+
+    <style name="Text.Medium.35sp">
+        <item name="android:textSize">35sp</item>
+    </style>
+
+    <style name="Text.Medium.45sp">
+        <item name="android:textSize">45sp</item>
+    </style>
+
+    <!-- Bold styles -->
+    <style name="Text.Bold.13sp">
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="Text.Bold.15sp">
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="Text.Bold.17sp">
+        <item name="android:textSize">17sp</item>
+    </style>
+
+    <style name="Text.Bold.21sp">
+        <item name="android:textSize">21sp</item>
+    </style>
+
+    <style name="Text.Bold.25sp">
+        <item name="android:textSize">25sp</item>
+    </style>
+
+    <style name="Text.Bold.35sp">
+        <item name="android:textSize">35sp</item>
+    </style>
+
+    <style name="Text.Bold.36sp">
+        <item name="android:textSize">36sp</item>
+    </style>
+
+    <!-- Light styles -->
+    <style name="Text.Light.75sp">
+        <item name="android:textSize">75sp</item>
+    </style>
+
+    <!-- SemiBold styles -->
+    <style name="Text.SemiBold.9sp">
+        <item name="android:textSize">9sp</item>
+    </style>
+
+    <style name="Text.SemiBold.13sp">
+        <item name="android:textSize">13sp</item>
+    </style>
+
+</resources>
