@@ -41,6 +41,7 @@ class HealthConnectFragment : BaseBindingFragment<FragmentHealthConnectBinding>(
 
                 @SuppressLint("SetTextI18n")
                 override fun onPageSelected(position: Int) {
+                    selectPeriod(Period.fromPosition(position))
                 }
 
                 override fun onPageScrollStateChanged(state: Int) {

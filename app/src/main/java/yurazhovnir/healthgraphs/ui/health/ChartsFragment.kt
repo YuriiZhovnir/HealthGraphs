@@ -71,6 +71,7 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
                     }
                 }
             }
+
             HealthDataPeriod.Month -> {
                 val lastDays = getLastDays(30)
                 lastDays.forEach { day ->
@@ -80,6 +81,7 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
                     }
                 }
             }
+
             HealthDataPeriod.Year -> {
                 val last12Months = getLastMonths()
                 last12Months.forEach { month ->
@@ -237,9 +239,14 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
                 isEnabled = true
                 setDrawGridLines(false)
                 valueFormatter = IndexAxisValueFormatter(dataMap.keys.toTypedArray())
+
                 position = XAxis.XAxisPosition.BOTTOM
                 granularity = 1f
-                labelCount = dataMap.size
+                labelCount = if (healthDataPeriod == HealthDataPeriod.Month) {
+                    6
+                } else {
+                    dataMap.size
+                }
                 axisLineColor = Color.TRANSPARENT
                 gridColor = Color.TRANSPARENT
                 textColor = ContextCompat.getColor(context, R.color.text_green_dark)
