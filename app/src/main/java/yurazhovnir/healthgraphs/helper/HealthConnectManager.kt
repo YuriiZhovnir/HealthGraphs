@@ -147,4 +147,122 @@ class HealthConnectManager(private val context: Context) {
             emptySet()
         }
     }
+    data class BatchBiometricData(
+        val stepsRecords: List<StepsRecord>,
+        val hydrationRecords: List<HydrationRecord>,
+        val sleepRecords: List<SleepSessionRecord>,
+        val exerciseRecords: List<ExerciseSessionRecord>,
+        val heartRateRecords: List<HeartRateRecord>
+    ) {
+        fun getDailyData(dayStart: Instant, dayEnd: Instant): DailyBiometricSummary {
+            val steps = stepsRecords
+                .filter { it.startTime >= dayStart && it.endTime < dayEnd }
+                .sumOf { it.count }
+                .toInt()
+
+            val hydration = hydrationRecords
+                .filter { it.startTime >= dayStart && it.startTime < dayEnd }
+                .sumOf { it.volume.inLiters }
+
+            val physicalActivity = exerciseRecords
+                .filter { it.startTime >= dayStart && it.endTime <= dayEnd ||
+                        (it.startTime < dayEnd && it.endTime > dayStart) }
+                .sumOf {
+                    val overlapStart = maxOf(it.startTime, dayStart)
+                    val overlapEnd = minOf(it.endTime, dayEnd)
+                    java.time.Duration.between(overlapStart, overlapEnd).toMinutes().toDouble()
+                }
+
+            val sleepHours = sleepRecords
+                .filter { it.startTime >= dayStart && it.endTime <= dayEnd ||
+                        (it.startTime < dayEnd && it.endTime > dayStart) }
+                .sumOf {
+                    val overlapStart = maxOf(it.startTime, dayStart)
+                    val overlapEnd = minOf(it.endTime, dayEnd)
+                    java.time.Duration.between(overlapStart, overlapEnd).toHours().toDouble()
+                }
+
+            val heartRateSum = heartRateRecords
+                .filter { it.startTime >= dayStart && it.endTime < dayEnd }
+                .flatMap { it.samples }
+                .map { it.beatsPerMinute.toDouble() }
+
+            val heartRate = if (heartRateSum.isNotEmpty()) {
+                heartRateSum.average()
+            } else null
+
+            return DailyBiometricSummary(
+                steps = if (steps > 0) steps else null,
+                hydration = if (hydration > 0) hydration else null,
+                physicalActivity = if (physicalActivity > 0) physicalActivity else null,
+                sleepHours = if (sleepHours > 0) sleepHours else null,
+                heartRate = heartRate
+            )
+        }
+    }
+
+    suspend fun getBatchBiometricData(
+        startTime: Instant,
+        endTime: Instant
+    ): BatchBiometricData = withContext(Dispatchers.IO) {
+        val grantedPermissions = getGrantedPermissions()
+
+        // Fetch all steps data in one request
+        val stepsData = if (grantedPermissions.contains(HealthPermission.getReadPermission(StepsRecord::class))) {
+            healthConnectClient?.readRecords(
+                ReadRecordsRequest(
+                    StepsRecord::class,
+                    timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+                )
+            )?.records ?: emptyList()
+        } else emptyList()
+
+        // Fetch all hydration data in one request
+        val hydrationData = if (grantedPermissions.contains(HealthPermission.getReadPermission(HydrationRecord::class))) {
+            healthConnectClient?.readRecords(
+                ReadRecordsRequest(
+                    HydrationRecord::class,
+                    timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+                )
+            )?.records ?: emptyList()
+        } else emptyList()
+
+        // Fetch all sleep data in one request
+        val sleepData = if (grantedPermissions.contains(HealthPermission.getReadPermission(SleepSessionRecord::class))) {
+            healthConnectClient?.readRecords(
+                ReadRecordsRequest(
+                    SleepSessionRecord::class,
+                    timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+                )
+            )?.records ?: emptyList()
+        } else emptyList()
+
+        // Fetch all exercise data in one request
+        val exerciseData = if (grantedPermissions.contains(HealthPermission.getReadPermission(ExerciseSessionRecord::class))) {
+            healthConnectClient?.readRecords(
+                ReadRecordsRequest(
+                    ExerciseSessionRecord::class,
+                    timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+                )
+            )?.records ?: emptyList()
+        } else emptyList()
+
+        // Fetch all heart rate data in one request
+        val heartRateData = if (grantedPermissions.contains(HealthPermission.getReadPermission(HeartRateRecord::class))) {
+            healthConnectClient?.readRecords(
+                ReadRecordsRequest(
+                    HeartRateRecord::class,
+                    timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+                )
+            )?.records ?: emptyList()
+        } else emptyList()
+
+        BatchBiometricData(
+            stepsRecords = stepsData,
+            hydrationRecords = hydrationData,
+            sleepRecords = sleepData,
+            exerciseRecords = exerciseData,
+            heartRateRecords = heartRateData
+        )
+    }
 }

@@ -17,7 +17,7 @@ object RealmHelper {
                 LastTimeAdd::class,
             )
         )
-            .schemaVersion(3)
+            .schemaVersion(4)
             .build()
 
     var realm: Realm? = Realm.open(config)

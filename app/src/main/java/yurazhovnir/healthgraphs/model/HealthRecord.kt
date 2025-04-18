@@ -9,6 +9,7 @@ open class HealthRecord : RealmObject {
     var type: String= ""
     var doneAt: String? = ""
     var startsAt: String? = ""
+    var displayDate: String? = ""
 
     var hydration: Double? = null
     var steps: Int? = null

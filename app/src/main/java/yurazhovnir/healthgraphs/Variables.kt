@@ -19,22 +19,20 @@ val PERMISSIONS = setOf(
 val Int.dp: Int
     get() = (this * Resources.getSystem().displayMetrics.density + 0.5f).toInt()
 
-enum class HealthDataPeriod(val days: Int) {
-    Day(1),
-    Week(7),
-    Month(30),
-    Year(12)
+enum class HealthDataPeriod {
+    Week,
+    Month,
+    Year
 }
 
 enum class Period(val position: Int) {
-    Day(0),
-    Week(1),
-    Month(2),
-    Year(3);
+    Week(0),
+    Month(1),
+    Year(2);
 
     companion object {
         fun fromPosition(position: Int): Period {
-            return values().firstOrNull { it.position == position } ?: Day
+            return values().firstOrNull { it.position == position } ?: Week
         }
     }
 }

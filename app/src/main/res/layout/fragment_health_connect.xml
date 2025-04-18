@@ -54,26 +54,26 @@
             android:layout_marginEnd="16dp"
             android:orientation="horizontal">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/dayView"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:onClick="@{()-> connectFragment.onDayClick()}"
-                app:cardBackgroundColor='@{positionSelected == 0 ? @color/color_selected : @color/transparent}'
-                app:cardCornerRadius="26dp"
-                app:cardElevation="0dp">
+<!--            <com.google.android.material.card.MaterialCardView-->
+<!--                android:id="@+id/dayView"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:layout_marginEnd="6dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:onClick="@{()-> connectFragment.onDayClick()}"-->
+<!--                app:cardBackgroundColor='@{positionSelected == 0 ? @color/color_selected : @color/transparent}'-->
+<!--                app:cardCornerRadius="26dp"-->
+<!--                app:cardElevation="0dp">-->
 
-                <TextView
-                    style="@style/Text.Bold.17sp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:text="@string/day"
-                    android:textColor="@color/text_green_dark" />
-            </com.google.android.material.card.MaterialCardView>
+<!--                <TextView-->
+<!--                    style="@style/Text.Bold.17sp"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="@string/day"-->
+<!--                    android:textColor="@color/text_green_dark" />-->
+<!--            </com.google.android.material.card.MaterialCardView>-->
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/weekView"
@@ -82,7 +82,7 @@
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:onClick="@{()-> connectFragment.onWeekClick()}"
-                app:cardBackgroundColor='@{positionSelected == 1 ? @color/color_selected : @color/transparent}'
+                app:cardBackgroundColor='@{positionSelected == 0 ? @color/color_selected : @color/transparent}'
                 app:cardCornerRadius="26dp"
                 app:cardElevation="0dp">
 
@@ -103,7 +103,7 @@
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:onClick="@{()-> connectFragment.onMonthClick()}"
-                app:cardBackgroundColor='@{positionSelected == 2 ? @color/color_selected : @color/transparent}'
+                app:cardBackgroundColor='@{positionSelected == 1 ? @color/color_selected : @color/transparent}'
                 app:cardCornerRadius="26dp"
                 app:cardElevation="0dp">
 
@@ -123,9 +123,9 @@
                 android:layout_height="40dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:onClick="@{()-> connectFragment.onYearClick()}"
-                app:cardBackgroundColor='@{positionSelected == 3 ? @color/color_selected : @color/transparent}'
+                app:cardBackgroundColor='@{positionSelected == 2 ? @color/color_selected : @color/transparent}'
                 app:cardCornerRadius="26dp"
                 app:cardElevation="0dp">
 

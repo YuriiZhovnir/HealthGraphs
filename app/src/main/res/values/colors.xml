@@ -12,5 +12,6 @@
     <color name="background_green_light">#91D6B0</color>
     <color name="transparent">#00000000</color>
     <color name="color_selected">#E7FBEC</color>
+    <color name="color_selected_start">#F5F5F5</color>
 
 </resources>

@@ -9,7 +9,6 @@ import android.view.*
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -21,26 +20,19 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
 import io.realm.kotlin.ext.copyFromRealm
-import kotlinx.coroutines.launch
 import yurazhovnir.healthgraphs.HealthDataPeriod
 import yurazhovnir.healthgraphs.R
 import yurazhovnir.healthgraphs.base.BaseBindingFragment
 import yurazhovnir.healthgraphs.base.RoundedBarChartTime
 import yurazhovnir.healthgraphs.databinding.FragmentChartsBinding
 import yurazhovnir.healthgraphs.dp
-import yurazhovnir.healthgraphs.helper.HealthConnectManager
 import yurazhovnir.healthgraphs.helper.RealmHelper
 import yurazhovnir.healthgraphs.model.HealthRecord
-import yurazhovnir.healthgraphs.model.LastTimeAdd
-import yurazhovnir.healthgraphs.setToDate
-import yurazhovnir.healthgraphs.setToStringFormat
 import java.text.SimpleDateFormat
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import java.util.ArrayList
 import java.util.Calendar
 import java.util.Date
@@ -54,155 +46,80 @@ private const val BAR_CHART_HEART_RATE_ID = 123459
 private const val BAR_CHART_EXERCISE_ID = 123460
 
 class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentChartsBinding::inflate) {
+
     override val TAG: String
         get() = "ChartsFragment"
-    private lateinit var healthConnectManager: HealthConnectManager
-    private val dayFormat = DateTimeFormatter.ofPattern("HH:mm")
+
+    private val healthRecords: MutableList<HealthRecord> = mutableListOf()
+    var healthDataPeriod: HealthDataPeriod = HealthDataPeriod.Week
     private val weekFormat = SimpleDateFormat("EEE", Locale.getDefault())
     private val monthFormat = SimpleDateFormat("dd", Locale.getDefault())
     private val yearFormat = SimpleDateFormat("MMM", Locale.getDefault())
-    var healthDataPeriod: HealthDataPeriod = HealthDataPeriod.Day
-    private val healthRecords: ArrayList<HealthRecord>? = ArrayList()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        healthConnectManager = HealthConnectManager(requireContext())
         loadHealthData()
     }
 
     private fun loadHealthData() {
-        val lastTimeAdd = RealmHelper.realm?.query(LastTimeAdd::class)?.first()?.find()
-        val today = Date().setToStringFormat("yyyy-MM-dd").setToDate("yyyy-MM-dd")
-        val lastDate = lastTimeAdd?.lastAt?.setToDate("yyyy-MM-dd")
+        val fetchedRecords = RealmHelper.realm?.query(HealthRecord::class)?.find()?.copyFromRealm() ?: emptyList()
+        healthRecords.clear()
 
-        if (lastDate == null || lastDate.before(today)) {
-            lifecycleScope.launch {
-                healthRecords?.clear()
-                if (healthConnectManager.checkAndRequestPermissions()) {
-                    val now = Instant.now()
-                    if (healthDataPeriod == HealthDataPeriod.Year) {
-                        val monthsToFetch = 12
-                        val now = Instant.now()
-
-                        for (i in 0 until monthsToFetch) {
-                            val currentDate = LocalDateTime.ofInstant(now, ZoneId.systemDefault())
-
-                            val monthToCheck = currentDate.minusMonths(i.toLong())
-                            val firstDayOfMonth = monthToCheck.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0)
-                            val lastDayOfMonth = firstDayOfMonth.plusMonths(1).minusSeconds(1)
-
-                            val currentMonthStart = firstDayOfMonth.atZone(ZoneId.systemDefault()).toInstant()
-                            val currentMonthEnd = lastDayOfMonth.atZone(ZoneId.systemDefault()).toInstant()
-
-                            var monthlySteps = 0
-                            var monthlyHydration = 0.0
-                            var monthlySleepHours = 0.0
-                            var monthlyHeartRate = 0.0
-                            var monthlyActiveMinutes = 0.0
-                            var daysWithData = 0
-
-                            var currentDay = currentMonthStart
-                            while (currentDay.isBefore(currentMonthEnd)) {
-                                val nextDay = currentDay.plus(1, ChronoUnit.DAYS)
-
-                                val dailySummary = healthConnectManager.getDailyBiometricSummary(
-                                    startTime = currentDay,
-                                    endTime = nextDay
-                                )
-
-                                if (dailySummary.steps != null || dailySummary.hydration != null ||
-                                    dailySummary.sleepHours != null || dailySummary.heartRate != null ||
-                                    dailySummary.physicalActivity != null
-                                ) {
-                                    monthlySteps += dailySummary.steps ?: 0
-                                    monthlyHydration += dailySummary.hydration ?: 0.0
-                                    monthlySleepHours += dailySummary.sleepHours ?: 0.0
-                                    monthlyHeartRate += dailySummary.heartRate ?: 0.0
-                                    monthlyActiveMinutes += dailySummary.physicalActivity ?: 0.0
-                                    daysWithData++
-                                }
-
-                                currentDay = nextDay
-                            }
-
-                            val avgHeartRate = if (daysWithData > 0) monthlyHeartRate / daysWithData else 0.0
-                            val avgSleepHours = if (daysWithData > 0) monthlySleepHours / daysWithData else 0.0
-
-                            val newRecord = HealthRecord().apply {
-                                val formattedDate = firstDayOfMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"))
-                                doneAt = formattedDate
-                                startsAt = formattedDate
-
-                                steps = monthlySteps
-                                hydration = monthlyHydration
-                                sleep = avgSleepHours.toInt()
-                                heartRate = avgHeartRate.toInt()
-                                activeMinutes = monthlyActiveMinutes.toInt()
-                                type = healthDataPeriod.name
-                                source = "Health Connect"
-                            }
-                            RealmHelper.save(newRecord)
-                            healthRecords?.add(newRecord)
-                        }
-
-                        updateAllCharts()
-                    } else {
-                        for (i in 1..healthDataPeriod.days) {
-                            val dayEnd = now.minus((i - 1).toLong(), ChronoUnit.DAYS)
-                            val dayStart = dayEnd.minus(1, ChronoUnit.DAYS)
-
-                            val summary = healthConnectManager.getDailyBiometricSummary(
-                                startTime = dayStart,
-                                endTime = dayEnd
-                            )
-
-                            val newRecord = HealthRecord().apply {
-                                val recordDateTime = LocalDateTime.ofInstant(dayStart, ZoneId.systemDefault())
-                                val formattedDate = recordDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                                doneAt = formattedDate
-                                startsAt = formattedDate
-
-                                steps = summary.steps
-                                type = healthDataPeriod.name
-                                hydration = summary.hydration
-                                sleep = summary.sleepHours?.toInt()
-                                heartRate = summary.heartRate?.toInt()
-                                activeMinutes = summary.physicalActivity?.toInt()
-                                source = "Health Connect"
-
-                            }
-                            if (healthDataPeriod.days == 30) {
-                                RealmHelper.save(newRecord)
-                            }
-
-                            healthRecords?.add(newRecord)
-                        }
+        when (healthDataPeriod) {
+            HealthDataPeriod.Week -> {
+                val last7Days = getLastDays(7)
+                last7Days.forEach { day ->
+                    val recordsForDay = fetchedRecords.filter { it.startsAt == day }
+                    if (recordsForDay.isNotEmpty()) {
+                        healthRecords.addAll(recordsForDay)
                     }
-
-                    updateAllCharts()
                 }
             }
-
-        } else {
-            RealmHelper.realm?.query(HealthRecord::class)?.find()?.forEach { record ->
-                if (record.copyFromRealm().type == healthDataPeriod.name) {
-                    healthRecords?.add(record)
+            HealthDataPeriod.Month -> {
+                val last30Days = getLastDays(30)
+                last30Days.forEach { day ->
+                    val recordsForDay = fetchedRecords.filter { it.startsAt == day }
+                    if (recordsForDay.isNotEmpty()) {
+                        healthRecords.addAll(recordsForDay)
+                    }
                 }
             }
-            updateAllCharts()
+            HealthDataPeriod.Year -> {
+                val last12Months = getLastMonths()
+                last12Months.forEach { month ->
+                    val recordsForMonth = fetchedRecords.filter { it.startsAt?.substring(0, 7) == month }
+                    if (recordsForMonth.isNotEmpty()) {
+                        healthRecords.addAll(recordsForMonth)
+                    }
+                }
+            }
         }
+        updateAllCharts()
+    }
 
+    private fun getLastDays(to: Int): List<String> {
+        val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val lastDays = mutableListOf<String>()
+        var currentDate = LocalDate.now()
+        for (i in 0 until to) {
+            lastDays.add(currentDate.format(dateFormat))
+            currentDate = currentDate.minusDays(1)
+        }
+        return lastDays.reversed()
+    }
+
+    private fun getLastMonths(): List<String> {
+        val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM")
+        val lastMonths = mutableListOf<String>()
+        var currentDate = LocalDate.now()
+        for (i in 0 until 12) {
+            lastMonths.add(currentDate.format(dateFormat))
+            currentDate = currentDate.minusMonths(1)
+        }
+        return lastMonths.reversed()
     }
 
     private fun updateAllCharts() {
-        if (healthDataPeriod == HealthDataPeriod.Month) {
-            val lastTimeAdd = LastTimeAdd()
-            lastTimeAdd.id = 1
-            val currentDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-            lastTimeAdd.lastAt = currentDateTime
-            RealmHelper.save(lastTimeAdd)
-        }
         val labels = getFormattedLabels()
-
         val stepsData = createDataMap(labels) { it.steps ?: 0 }
         val hydrationData = createDataMap(labels) { (it.hydration ?: 0.0).toInt() }
         val sleepData = createDataMap(labels) { it.sleep ?: 0 }
@@ -221,26 +138,22 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
         val labels = mutableListOf<String>()
 
         val formatter = when (healthDataPeriod) {
-            HealthDataPeriod.Day -> dayFormat
             HealthDataPeriod.Week -> weekFormat
             HealthDataPeriod.Month -> monthFormat
             HealthDataPeriod.Year -> yearFormat
         }
 
         when (healthDataPeriod) {
-            HealthDataPeriod.Day -> {
-                for (i in 0 until 24 step 4) {
-                    calendar.set(Calendar.HOUR_OF_DAY, i)
-                    calendar.set(Calendar.MINUTE, 0)
+            HealthDataPeriod.Year -> {
+                calendar.time = Date()
+                for (i in 0 until 12) {
+                    calendar.add(Calendar.MONTH, -1)
                     if (formatter is SimpleDateFormat) {
                         labels.add(formatter.format(calendar.time))
                     } else {
-                        val localDateTime = LocalDateTime.of(
-                            calendar.get(Calendar.YEAR),
-                            calendar.get(Calendar.MONTH) + 1,
-                            calendar.get(Calendar.DAY_OF_MONTH),
-                            i,
-                            0
+                        val localDateTime = LocalDateTime.ofInstant(
+                            calendar.toInstant(),
+                            ZoneId.systemDefault()
                         )
                         labels.add(localDateTime.format(formatter as DateTimeFormatter))
                     }
@@ -249,8 +162,7 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
 
             else -> {
                 calendar.time = Date()
-
-                for (i in 0 until healthDataPeriod.days) {
+                for (i in 0 until (healthRecords?.count()?.plus(1) ?: 0)) {
                     calendar.add(Calendar.DAY_OF_YEAR, -1)
                     if (formatter is SimpleDateFormat) {
                         labels.add(formatter.format(calendar.time))
@@ -268,38 +180,38 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
         return labels.reversed()
     }
 
-    private fun createDataMap(
-        labels: List<String>,
-        valueSelector: (HealthRecord) -> Int
-    ): Map<String, Int> {
+    private fun createDataMap(labels: List<String>, valueSelector: (HealthRecord) -> Int): Map<String, Int> {
         val dataMap = mutableMapOf<String, Int>()
+        labels.forEach { label -> dataMap[label] = 0 }
 
-        labels.forEach { label ->
-            dataMap[label] = 0
-        }
+        if (healthDataPeriod == HealthDataPeriod.Year) {
+            val formatter = SimpleDateFormat("MMM", Locale.getDefault())
+            val grouped = healthRecords.groupBy {
+                it.startsAt?.let { start ->
+                    formatter.format(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(start)!!)
+                } ?: ""
+            }
 
-        healthRecords?.forEachIndexed { index, record ->
-            if (index < labels.size) {
-                val label = labels[index]
-                dataMap[label] = valueSelector(record)
+            for ((month, records) in grouped) {
+                if (month in dataMap) {
+                    dataMap[month] = records.sumOf { valueSelector(it) }
+                }
+            }
+        } else {
+            healthRecords.forEachIndexed { index, record ->
+                if (index < labels.size) {
+                    val label = labels[index]
+                    dataMap[label] = valueSelector(record)
+                }
             }
         }
 
         return dataMap
     }
 
-    private fun setupBarChart(
-        container: LinearLayout,
-        chartId: Int,
-        dataMap: Map<String, Int>,
-        unit: String
-    ) {
+    private fun setupBarChart(container: LinearLayout, chartId: Int, dataMap: Map<String, Int>, unit: String) {
         val maxValue = dataMap.values.maxOrNull() ?: 1
-        val avgValue = if (dataMap.isNotEmpty()) {
-            dataMap.values.sum().toDouble() / dataMap.size
-        } else {
-            0.0
-        }
+        val avgValue = if (dataMap.isNotEmpty()) dataMap.values.sum().toDouble() / dataMap.size else 0.0
 
         container.removeAllViews()
 
@@ -311,13 +223,7 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
         }
     }
 
-    private fun setupChartWithData(
-        chart: RoundedBarChartTime,
-        dataMap: Map<String, Int>,
-        maxValue: Int,
-        avgValue: Double,
-        unit: String
-    ) {
+    private fun setupChartWithData(chart: RoundedBarChartTime, dataMap: Map<String, Int>, maxValue: Int, avgValue: Double, unit: String) {
         chart.apply {
             description?.isEnabled = false
             legend?.isEnabled = false
@@ -399,7 +305,7 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
 
         val emptyBarDataSet = BarDataSet(emptyValues, "Empty Data").apply {
             setGradientColor(
-                ContextCompat.getColor(requireContext(), R.color.black),
+                ContextCompat.getColor(requireContext(), R.color.color_selected_start),
                 ContextCompat.getColor(requireContext(), R.color.white)
             )
             color = ContextCompat.getColor(requireContext(), R.color.text_green_dark)
@@ -440,10 +346,5 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
         override fun getOffset(): MPPointF {
             return MPPointF(-(width / 2f), -height.toFloat())
         }
-    }
-
-    override fun onDestroyView() {
-        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-        super.onDestroyView()
     }
 }

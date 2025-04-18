@@ -20,16 +20,15 @@ class HealthConnectFragment : BaseBindingFragment<FragmentHealthConnectBinding>(
         super.onViewCreated(view, savedInstanceState)
         binding.connectFragment = this
         viewPager()
-        selectPeriod(Period.Day)
+        selectPeriod(Period.Week)
     }
 
     private fun viewPager() {
         viewPagerAdapter = ViewPagerAdapter(childFragmentManager).apply {
-            addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Day))
+            //            addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Year))
             addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Week))
             addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Month))
-//            addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Year))
-
+            addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Year))
         }
         binding.viewPager.apply {
             adapter = viewPagerAdapter
@@ -55,9 +54,9 @@ class HealthConnectFragment : BaseBindingFragment<FragmentHealthConnectBinding>(
 
     }
 
-    fun onDayClick() {
-        selectPeriod(Period.Day)
-    }
+//    fun onDayClick() {
+//        selectPeriod(Period.Day)
+//    }
 
     fun onWeekClick() {
         selectPeriod(Period.Week)
@@ -70,6 +69,7 @@ class HealthConnectFragment : BaseBindingFragment<FragmentHealthConnectBinding>(
     fun onYearClick() {
         selectPeriod(Period.Year)
     }
+
     private fun selectPeriod(period: Period) {
         binding.viewPager.currentItem = period.position
         binding.positionSelected = period.position
