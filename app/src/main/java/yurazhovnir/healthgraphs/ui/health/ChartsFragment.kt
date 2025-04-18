@@ -16,7 +16,6 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
 import io.realm.kotlin.ext.copyFromRealm
@@ -30,8 +29,6 @@ import yurazhovnir.healthgraphs.helper.RealmHelper
 import yurazhovnir.healthgraphs.model.HealthRecord
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.ArrayList
 import java.util.Calendar
@@ -66,20 +63,20 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
 
         when (healthDataPeriod) {
             HealthDataPeriod.Week -> {
-                val last7Days = getLastDays(7)
-                last7Days.forEach { day ->
-                    val recordsForDay = fetchedRecords.filter { it.startsAt == day }
-                    if (recordsForDay.isNotEmpty()) {
-                        healthRecords.addAll(recordsForDay)
+                val lastDays = getLastDays(7)
+                lastDays.forEach { day ->
+                    val recordsForDay = fetchedRecords.filter { it.startsAt == day }.firstOrNull()
+                    if (recordsForDay != null) {
+                        healthRecords.add(recordsForDay)
                     }
                 }
             }
             HealthDataPeriod.Month -> {
-                val last30Days = getLastDays(30)
-                last30Days.forEach { day ->
-                    val recordsForDay = fetchedRecords.filter { it.startsAt == day }
-                    if (recordsForDay.isNotEmpty()) {
-                        healthRecords.addAll(recordsForDay)
+                val lastDays = getLastDays(30)
+                lastDays.forEach { day ->
+                    val recordsForDay = fetchedRecords.filter { it.startsAt == day }.firstOrNull()
+                    if (recordsForDay != null) {
+                        healthRecords.add(recordsForDay)
                     }
                 }
             }
@@ -146,33 +143,19 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
         when (healthDataPeriod) {
             HealthDataPeriod.Year -> {
                 calendar.time = Date()
+
                 for (i in 0 until 12) {
+                    labels.add(formatter.format(calendar.time))
                     calendar.add(Calendar.MONTH, -1)
-                    if (formatter is SimpleDateFormat) {
-                        labels.add(formatter.format(calendar.time))
-                    } else {
-                        val localDateTime = LocalDateTime.ofInstant(
-                            calendar.toInstant(),
-                            ZoneId.systemDefault()
-                        )
-                        labels.add(localDateTime.format(formatter as DateTimeFormatter))
-                    }
                 }
             }
 
             else -> {
                 calendar.time = Date()
-                for (i in 0 until (healthRecords?.count()?.plus(1) ?: 0)) {
+                val total = healthRecords.count().plus(1) ?: 0
+                for (i in 0 until total) {
+                    labels.add(formatter.format(calendar.time))
                     calendar.add(Calendar.DAY_OF_YEAR, -1)
-                    if (formatter is SimpleDateFormat) {
-                        labels.add(formatter.format(calendar.time))
-                    } else {
-                        val localDateTime = LocalDateTime.ofInstant(
-                            calendar.toInstant(),
-                            ZoneId.systemDefault()
-                        )
-                        labels.add(localDateTime.format(formatter as DateTimeFormatter))
-                    }
                 }
             }
         }
@@ -188,7 +171,7 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
             val formatter = SimpleDateFormat("MMM", Locale.getDefault())
             val grouped = healthRecords.groupBy {
                 it.startsAt?.let { start ->
-                    formatter.format(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(start)!!)
+                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(start)?.let { it1 -> formatter.format(it1) }
                 } ?: ""
             }
 
@@ -242,14 +225,6 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
 
             axisLeft.apply {
                 isEnabled = true
-                valueFormatter = object : ValueFormatter() {
-                    override fun getFormattedValue(value: Float): String {
-                        return when (value.toInt()) {
-                            0, avgValue.toInt(), maxValue -> "${value.toInt()}$unit"
-                            else -> ""
-                        }
-                    }
-                }
                 axisMinimum = 0f
                 axisMaximum = maxValue.toFloat() * 1.2f
                 setDrawGridLines(false)

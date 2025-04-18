@@ -25,7 +25,6 @@ class HealthConnectFragment : BaseBindingFragment<FragmentHealthConnectBinding>(
 
     private fun viewPager() {
         viewPagerAdapter = ViewPagerAdapter(childFragmentManager).apply {
-            //            addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Year))
             addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Week))
             addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Month))
             addFragment(FragmentFactory.newChartsFragment(HealthDataPeriod.Year))
@@ -53,10 +52,6 @@ class HealthConnectFragment : BaseBindingFragment<FragmentHealthConnectBinding>(
     fun onConnectGoogleHealthClick() {
 
     }
-
-//    fun onDayClick() {
-//        selectPeriod(Period.Day)
-//    }
 
     fun onWeekClick() {
         selectPeriod(Period.Week)

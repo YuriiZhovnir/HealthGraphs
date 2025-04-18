@@ -95,5 +95,7 @@
     <style name="Text.SemiBold.13sp">
         <item name="android:textSize">13sp</item>
     </style>
-
+    <style name="Text.SemiBold.17sp">
+        <item name="android:textSize">17sp</item>
+    </style>
 </resources>

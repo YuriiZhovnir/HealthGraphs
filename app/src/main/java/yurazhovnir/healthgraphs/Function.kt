@@ -1,6 +1,7 @@
 package yurazhovnir.healthgraphs
 
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.util.Date
 import java.util.Locale
 
@@ -26,6 +27,7 @@ fun String.parse(inFormat: String?): Date? {
     } catch (e: Exception) {
         null // Якщо формат не вірний, повертається null
     }
-}
+}fun Instant.toDate(): Date = Date.from(this)
+
 
 

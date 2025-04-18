@@ -9,6 +9,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/white"
         android:fillViewport="true">
 
         <LinearLayout
@@ -48,7 +49,7 @@
                         android:layout_marginBottom="16dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
-                        android:background="@color/text_green_dark_50"
+                        android:background="@color/line_color"
                         android:layout_height="1dp"/>
                     <LinearLayout
                         android:id="@+id/chartStepsLayout"
@@ -93,7 +94,7 @@
                             android:layout_marginBottom="16dp"
                             android:layout_marginStart="16dp"
                             android:layout_marginEnd="16dp"
-                            android:background="@color/text_green_dark_50"
+                            android:background="@color/line_color"
                             android:layout_height="1dp"/>
                     <LinearLayout
                         android:id="@+id/chartHydrationLayout"
@@ -138,7 +139,7 @@
                         android:layout_marginBottom="16dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
-                        android:background="@color/text_green_dark_50"
+                        android:background="@color/line_color"
                         android:layout_height="1dp"/>
                     <LinearLayout
                         android:id="@+id/chartSleepLayout"
@@ -183,7 +184,7 @@
                         android:layout_marginBottom="16dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
-                        android:background="@color/text_green_dark_50"
+                        android:background="@color/line_color"
                         android:layout_height="1dp"/>
                     <LinearLayout
                         android:id="@+id/chartHeartRateLayout"
@@ -230,7 +231,7 @@
                         android:layout_marginBottom="16dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
-                        android:background="@color/text_green_dark_50"
+                        android:background="@color/line_color"
                         android:layout_height="1dp"/>
                     <LinearLayout
                         android:id="@+id/chartExerciseLayout"
