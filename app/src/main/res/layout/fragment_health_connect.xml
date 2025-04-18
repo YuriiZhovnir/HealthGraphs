@@ -25,12 +25,27 @@
             android:layout_height="wrap_content"
             android:onClick="@{()-> connectFragment.onConnectGoogleHealthClick()}"
             android:padding="16dp">
-
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_arrow_left_black_24"
+                android:onClick="@{()-> connectFragment.onBackClick()}"
+                app:riv_corner_radius="25dp"
+                app:riv_mutate_background="true"
+                app:riv_oval="true" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:gravity="center_vertical"
+                android:layout_centerHorizontal="true"
+                android:layout_marginEnd="16dp"
+                android:orientation="horizontal"
+                tools:ignore="UselessParent">
             <com.makeramen.roundedimageview.RoundedImageView
                 android:id="@+id/baseline_add_40"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_centerVertical="true"
                 android:background="@color/background_green_light"
                 android:src="@drawable/baseline_add_40"
                 app:riv_corner_radius="25dp"
@@ -38,14 +53,14 @@
                 app:riv_oval="true" />
 
             <TextView
+                android:id="@+id/textView"
                 style="@style/Text.Bold.21sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_marginStart="12dp"
-                android:layout_toEndOf="@+id/baseline_add_40"
                 android:text="@string/health_connect"
                 android:textColor="@color/text_green_dark" />
+            </LinearLayout>
         </RelativeLayout>
 
         <LinearLayout
@@ -54,27 +69,6 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:orientation="horizontal">
-
-<!--            <com.google.android.material.card.MaterialCardView-->
-<!--                android:id="@+id/dayView"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="40dp"-->
-<!--                android:layout_marginEnd="6dp"-->
-<!--                android:layout_weight="1"-->
-<!--                android:onClick="@{()-> connectFragment.onDayClick()}"-->
-<!--                app:cardBackgroundColor='@{positionSelected == 0 ? @color/color_selected : @color/transparent}'-->
-<!--                app:cardCornerRadius="26dp"-->
-<!--                app:cardElevation="0dp">-->
-
-<!--                <TextView-->
-<!--                    style="@style/Text.Bold.17sp"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:layout_gravity="center"-->
-<!--                    android:gravity="center"-->
-<!--                    android:text="@string/day"-->
-<!--                    android:textColor="@color/text_green_dark" />-->
-<!--            </com.google.android.material.card.MaterialCardView>-->
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/weekView"
