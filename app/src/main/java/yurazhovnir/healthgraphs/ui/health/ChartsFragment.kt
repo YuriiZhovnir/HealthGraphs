@@ -9,6 +9,7 @@ import android.view.*
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -43,157 +44,39 @@ private const val BAR_CHART_HEART_RATE_ID = 123459
 private const val BAR_CHART_EXERCISE_ID = 123460
 
 class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentChartsBinding::inflate) {
-
     override val TAG: String
         get() = "ChartsFragment"
-
-    private val healthRecords: MutableList<HealthRecord> = mutableListOf()
     var healthDataPeriod: HealthDataPeriod = HealthDataPeriod.Week
-    private val weekFormat = SimpleDateFormat("EEE", Locale.getDefault())
-    private val monthFormat = SimpleDateFormat("dd", Locale.getDefault())
-    private val yearFormat = SimpleDateFormat("MMM", Locale.getDefault())
+    private val viewModel: ChartsViewModel by viewModels()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadHealthData()
+        viewModel.healthDataPeriod = healthDataPeriod
+        viewModel.loadHealthData()
+
+        observeViewModel()
     }
 
-    private fun loadHealthData() {
-        val fetchedRecords = RealmHelper.realm?.query(HealthRecord::class)?.find()?.copyFromRealm() ?: emptyList()
-        healthRecords.clear()
-
-        when (healthDataPeriod) {
-            HealthDataPeriod.Week -> {
-                val lastDays = getLastDays(7)
-                lastDays.forEach { day ->
-                    val recordsForDay = fetchedRecords.filter { it.startsAt == day }.firstOrNull()
-                    if (recordsForDay != null) {
-                        healthRecords.add(recordsForDay)
-                    }
-                }
-            }
-
-            HealthDataPeriod.Month -> {
-                val lastDays = getLastDays(30)
-                lastDays.forEach { day ->
-                    val recordsForDay = fetchedRecords.filter { it.startsAt == day }.firstOrNull()
-                    if (recordsForDay != null) {
-                        healthRecords.add(recordsForDay)
-                    }
-                }
-            }
-
-            HealthDataPeriod.Year -> {
-                val last12Months = getLastMonths()
-                last12Months.forEach { month ->
-                    val recordsForMonth = fetchedRecords.filter { it.startsAt?.substring(0, 7) == month }
-                    if (recordsForMonth.isNotEmpty()) {
-                        healthRecords.addAll(recordsForMonth)
-                    }
-                }
-            }
-        }
-        updateAllCharts()
-    }
-
-    private fun getLastDays(to: Int): List<String> {
-        val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val lastDays = mutableListOf<String>()
-        var currentDate = LocalDate.now()
-        for (i in 0 until to) {
-            lastDays.add(currentDate.format(dateFormat))
-            currentDate = currentDate.minusDays(1)
-        }
-        return lastDays.reversed()
-    }
-
-    private fun getLastMonths(): List<String> {
-        val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM")
-        val lastMonths = mutableListOf<String>()
-        var currentDate = LocalDate.now()
-        for (i in 0 until 12) {
-            lastMonths.add(currentDate.format(dateFormat))
-            currentDate = currentDate.minusMonths(1)
-        }
-        return lastMonths.reversed()
-    }
-
-    private fun updateAllCharts() {
-        val labels = getFormattedLabels()
-        val stepsData = createDataMap(labels) { it.steps ?: 0 }
-        val hydrationData = createDataMap(labels) { (it.hydration ?: 0.0).toInt() }
-        val sleepData = createDataMap(labels) { it.sleep ?: 0 }
-        val heartRateData = createDataMap(labels) { it.heartRate ?: 0 }
-        val exerciseData = createDataMap(labels) { it.activeMinutes ?: 0 }
-
-        setupBarChart(binding.chartStepsLayout, BAR_CHART_STEPS_ID, stepsData, "steps")
-        setupBarChart(binding.chartHydrationLayout, BAR_CHART_HYDRATION_ID, hydrationData, "L")
-        setupBarChart(binding.chartSleepLayout, BAR_CHART_SLEEP_ID, sleepData, "h")
-        setupBarChart(binding.chartHeartRateLayout, BAR_CHART_HEART_RATE_ID, heartRateData, "bpm")
-        setupBarChart(binding.chartExerciseLayout, BAR_CHART_EXERCISE_ID, exerciseData, "min")
-    }
-
-    private fun getFormattedLabels(): List<String> {
-        val calendar = Calendar.getInstance()
-        val labels = mutableListOf<String>()
-
-        val formatter = when (healthDataPeriod) {
-            HealthDataPeriod.Week -> weekFormat
-            HealthDataPeriod.Month -> monthFormat
-            HealthDataPeriod.Year -> yearFormat
-        }
-
-        when (healthDataPeriod) {
-            HealthDataPeriod.Year -> {
-                calendar.time = Date()
-
-                for (i in 0 until 12) {
-                    labels.add(formatter.format(calendar.time))
-                    calendar.add(Calendar.MONTH, -1)
-                }
-            }
-
-            else -> {
-                calendar.time = Date()
-                val total = healthRecords.count().plus(1) ?: 0
-                for (i in 0 until total) {
-                    labels.add(formatter.format(calendar.time))
-                    calendar.add(Calendar.DAY_OF_YEAR, -1)
-                }
+    private fun observeViewModel() {
+        viewModel.chartLabels.observe(viewLifecycleOwner) { labels ->
+            viewModel.dataMaps.value?.let { data ->
+                updateAllCharts(labels, data)
             }
         }
 
-        return labels.reversed()
-    }
-
-    private fun createDataMap(labels: List<String>, valueSelector: (HealthRecord) -> Int): Map<String, Int> {
-        val dataMap = mutableMapOf<String, Int>()
-        labels.forEach { label -> dataMap[label] = 0 }
-
-        if (healthDataPeriod == HealthDataPeriod.Year) {
-            val formatter = SimpleDateFormat("MMM", Locale.getDefault())
-            val grouped = healthRecords.groupBy {
-                it.startsAt?.let { start ->
-                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(start)?.let { it1 -> formatter.format(it1) }
-                } ?: ""
-            }
-
-            for ((month, records) in grouped) {
-                if (month in dataMap) {
-                    dataMap[month] = records.sumOf { valueSelector(it) }
-                }
-            }
-        } else {
-            healthRecords.forEachIndexed { index, record ->
-                if (index < labels.size) {
-                    val label = labels[index]
-                    dataMap[label] = valueSelector(record)
-                }
+        viewModel.dataMaps.observe(viewLifecycleOwner) { data ->
+            viewModel.chartLabels.value?.let { labels ->
+                updateAllCharts(labels, data)
             }
         }
-
-        return dataMap
     }
-
+    private fun updateAllCharts(labels: List<String>, dataMaps: Map<String, Map<String, Int>>) {
+        setupBarChart(binding.chartStepsLayout, BAR_CHART_STEPS_ID, dataMaps["steps"] ?: emptyMap(), "steps")
+        setupBarChart(binding.chartHydrationLayout, BAR_CHART_HYDRATION_ID, dataMaps["hydration"] ?: emptyMap(), "L")
+        setupBarChart(binding.chartSleepLayout, BAR_CHART_SLEEP_ID, dataMaps["sleep"] ?: emptyMap(), "h")
+        setupBarChart(binding.chartHeartRateLayout, BAR_CHART_HEART_RATE_ID, dataMaps["heartRate"] ?: emptyMap(), "bpm")
+        setupBarChart(binding.chartExerciseLayout, BAR_CHART_EXERCISE_ID, dataMaps["exercise"] ?: emptyMap(), "min")
+    }
     private fun setupBarChart(container: LinearLayout, chartId: Int, dataMap: Map<String, Int>, unit: String) {
         val maxValue = dataMap.values.maxOrNull() ?: 1
         val avgValue = if (dataMap.isNotEmpty()) dataMap.values.sum().toDouble() / dataMap.size else 0.0
@@ -243,7 +126,7 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
                 position = XAxis.XAxisPosition.BOTTOM
                 granularity = 1f
                 labelCount = if (healthDataPeriod == HealthDataPeriod.Month) {
-                    6
+                    7
                 } else {
                     dataMap.size
                 }
@@ -262,7 +145,6 @@ class ChartsFragment : BaseBindingFragment<FragmentChartsBinding>(FragmentCharts
             invalidate()
         }
     }
-
     private fun createBarData(dataMap: Map<String, Int>): BarData {
         val filledValues = ArrayList<BarEntry>()
         val emptyValues = ArrayList<BarEntry>()

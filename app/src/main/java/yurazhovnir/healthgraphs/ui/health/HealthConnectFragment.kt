@@ -50,10 +50,6 @@ class HealthConnectFragment : BaseBindingFragment<FragmentHealthConnectBinding>(
         }
     }
 
-    fun onConnectGoogleHealthClick() {
-
-    }
-
     fun onWeekClick() {
         selectPeriod(Period.Week)
     }

@@ -2,6 +2,8 @@
 <resources>
 
     <style name="Theme.HealthGraphs" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <!-- Light styles -->

@@ -23,7 +23,6 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="@{()-> connectFragment.onConnectGoogleHealthClick()}"
             android:padding="16dp">
             <com.makeramen.roundedimageview.RoundedImageView
                 android:layout_width="40dp"
