@@ -63,9 +63,9 @@ class ChartsViewModel @Inject constructor() : ViewModel() {
     private fun generateLabels(count: Int): List<String> {
         val calendar = Calendar.getInstance()
         val format = when (healthDataPeriod) {
-            HealthDataPeriod.Week -> SimpleDateFormat("EEE", Locale.getDefault())
-            HealthDataPeriod.Month -> SimpleDateFormat("dd", Locale.getDefault())
-            HealthDataPeriod.Year -> SimpleDateFormat("MMM", Locale.getDefault())
+            HealthDataPeriod.Week -> SimpleDateFormat("EEE", Locale("en", "GB"))
+            HealthDataPeriod.Month -> SimpleDateFormat("dd", Locale("en", "GB"))
+            HealthDataPeriod.Year -> SimpleDateFormat("MMM", Locale("en", "GB"))
         }
         return (0 until count).map {
             val label = format.format(calendar.time)

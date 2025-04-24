@@ -19,22 +19,13 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
-import io.realm.kotlin.ext.copyFromRealm
 import yurazhovnir.healthgraphs.HealthDataPeriod
 import yurazhovnir.healthgraphs.R
 import yurazhovnir.healthgraphs.base.BaseBindingFragment
 import yurazhovnir.healthgraphs.base.RoundedBarChartTime
 import yurazhovnir.healthgraphs.databinding.FragmentChartsBinding
 import yurazhovnir.healthgraphs.dp
-import yurazhovnir.healthgraphs.helper.RealmHelper
-import yurazhovnir.healthgraphs.model.HealthRecord
-import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.ArrayList
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 
 private const val BAR_CHART_STEPS_ID = 123456
